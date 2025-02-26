@@ -13,42 +13,70 @@ headers = {
 }
 
 
-# years: 2022, 2017, 2012, 2007, 2002
 def get_economic_census(year: str, state: str, county: str = None, industry_code: str = None):
     url = f'{domain}/{year}/ecnbasic'
     params = {
-        'get': 'EMP,ESTAB',
-        'for': f'state:{state}',
-        'in': f'county:{county}' if county else None,
-        'NAICS': industry_code if industry_code else None,
+        'get': ','.join([
+            'EMP',  # Number of employees
+            'ESTAB',  # Number of establishments
+            'FIRM',  # Number of firms
+            'INDLEVEL',  # Industry level
+            'OPEX',  # Operating expenses
+            'PAYANN',  # Annual payroll
+            'RCPTOT',  # Sales, value of shipments, or revenue ($1000)
+            'SECTOR'  # NAICS economic sector
+        ]),
+        'for': f'county:{county}' if county else f'state:{state}',
+        'in': f'state:{state}' if county else None,
         'key': api_key
     }
 
+    # Remove None values
     params = {k: v for k, v in params.items() if v is not None}
 
-    return http_get(url=url, headers={}, params=params, body={})
+    # Update NAICS codes (based on year)
+    valid_years = {'2022', '2017', '2012', '2007', '2002'}
+    if industry_code and year in valid_years:
+        naics_field = f'NAICS{year}'
+        params[naics_field] = industry_code
+        params['get'] += f',{naics_field}_LABEL'
+
+    return http_get(url=url, headers=headers, params=params, body={})
 
 
-# years: 2023, 2022, 2021, 2020, 2019, 2018
 def get_annual_business_survey(year: str, state: str, county: str = None, industry_code: str = None):
     url = f'{domain}/{year}/abs'
     params = {
         'get': ','.join([
-            'EMP',  # Total number of employees
+            'EMP',  # Number of Employees,
+            'EMP_S',  # Relative standard error of number of employees (%)
+            'ETH_GROUP',  # Ethnicity code
+            'FIRMPDEMP',  # Number of employer firms
+            'FIRMPDEMP_S',  # Standard error of employer firms (%)
+            'INDGROUP',  # Industry group
+            'INDLEVEL',  # Industry level
             'PAYANN',  # Annual payroll
-            'RCPTOT',  # Total revenue
+            'PAYANN_S',  # Relative standard error of annual payroll (%)
             'RACE_GROUP',  # Race of business owner
+            'RCPSZFI',  # Sales, value of shipments, or revenue size of firms code
+            'SECTOR',  # NAICS economic sector
             'SEX',  # Gender of business owner
-            'FIRMPDEMP',  # Number of employees
-            'FIRMCHAR',  # Business age and survival rate
-            'TECHUSE'  # Technology adoption
+            'URSZFI',  # Urban and rural classification of firms code
+            'YIBSZFI'  # Years in business code
         ]),
-        'for': f'state:{state}',
-        'in': f'county:{county}' if county else None,
-        'NAICS': industry_code if industry_code else None,
+        'for': f'county:{county}' if county else f'state:{state}',
+        'in': f'state:{state}' if county else None,
         'key': api_key
     }
 
+    # Remove None values
     params = {k: v for k, v in params.items() if v is not None}
 
-    return http_get(url=url, headers={}, params=params, body={})
+    # Update NAICS codes (based on year)
+    valid_years = {'2023', '2022', '2021', '2020', '2019', '2018'}
+    if industry_code and year in valid_years:
+        naics_field = f'NAICS{year}'
+        params[naics_field] = industry_code
+        params['get'] += f',{naics_field}_LABEL'
+
+    return http_get(url=url, headers=headers, params=params, body={})

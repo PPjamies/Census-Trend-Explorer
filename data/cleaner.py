@@ -28,4 +28,11 @@ def clean_census_data(data_json):
     df = pd.DataFrame(data_json[1:], columns=data_json[0])
     print(df.head())
 
+    # determine threshold to drop na or replace na
+    nat_threshold =
+
+    # replace NaN, NaT, and None with "Unknown"
+    df.fillna("Unknown", inplace=True)
+
+
     return None

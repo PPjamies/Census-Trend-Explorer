@@ -4,19 +4,23 @@ from api.http import http_get
 
 api_key = os.getenv('CENSUS_API_KEY')
 if not api_key:
-    raise ValueError("Missing environment variable: CENSUS_API_KEY")
+    raise ValueError('Missing environment variable: CENSUS_API_KEY')
 
-domain = 'https://api.census.gov/data'
+domain = os.getenv('CENSUS_DOMAIN')
+if not domain:
+    raise ValueError('Missing environment variable: CENSUS_DOMAIN')
+
 headers = {
     'user-agent': 'MyCensusAPIClient/1.0',
     'accept': 'application/json'
 }
 
 
-def get_economic_census(year: str, state: str, county: str = None, industry_code: str = None):
+def fetch_economic_census(year: str, state: str, county: str = None, industry_code: str = None):
     url = f'{domain}/{year}/ecnbasic'
     params = {
         'get': ','.join([
+            'NAME',  # Geographic
             'EMP',  # Number of employees
             'ESTAB',  # Number of establishments
             'FIRM',  # Number of firms
@@ -44,10 +48,12 @@ def get_economic_census(year: str, state: str, county: str = None, industry_code
     return http_get(url=url, headers=headers, params=params, body={})
 
 
-def get_annual_business_survey(year: str, state: str, county: str = None, industry_code: str = None):
-    url = f'{domain}/{year}/abs'
+def fetch_annual_business_survey(year: str, state: str, county: str = None, industry_code: str = None,
+                                 offset: int = None, limit: int = None):
+    url = f'{domain}/{year}/abscs'
     params = {
         'get': ','.join([
+            'NAME', # Geographic
             'EMP',  # Number of Employees,
             'EMP_S',  # Relative standard error of number of employees (%)
             'ETH_GROUP',  # Ethnicity code
@@ -66,7 +72,9 @@ def get_annual_business_survey(year: str, state: str, county: str = None, indust
         ]),
         'for': f'county:{county}' if county else f'state:{state}',
         'in': f'state:{state}' if county else None,
-        'key': api_key
+        'key': api_key,
+        'offset': str(offset) if offset else None,
+        'limit': str(limit) if limit else None
     }
 
     # Remove None values

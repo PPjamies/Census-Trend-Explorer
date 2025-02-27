@@ -53,7 +53,7 @@ def fetch_annual_business_survey(year: str, state: str, county: str = None, indu
     url = f'{domain}/{year}/abscs'
     params = {
         'get': ','.join([
-            'NAME', # Geographic
+            'NAME',  # Geographic
             'EMP',  # Number of Employees,
             'EMP_S',  # Relative standard error of number of employees (%)
             'ETH_GROUP',  # Ethnicity code

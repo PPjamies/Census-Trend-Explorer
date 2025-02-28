@@ -1,7 +1,7 @@
 import os
 
 from api.http import http_get
-from etl_docker.census.constants.census_constants import ECONOMIC_CENSUS_API_VARIABLES, \
+from etl_docker.census.census_constants import ECONOMIC_CENSUS_API_VARIABLES, \
     ANNUAL_BUSINESS_SURVEY_API_VARIABLES
 from utils.utils import remove_none_values
 
